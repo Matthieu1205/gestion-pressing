@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +27,7 @@ import {
   CalendarDays,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const articleTypes = [
   { id: "chemise", name: "Chemise", price: 1500 },
@@ -54,10 +56,36 @@ interface DepositLine {
 }
 
 export default function NewDeposit() {
+  const navigate = useNavigate();
   const [client, setClient] = useState({ name: "", phone: "" });
   const [isExpress, setIsExpress] = useState(false);
   const [lines, setLines] = useState<DepositLine[]>([]);
   const [paymentMethod, setPaymentMethod] = useState("");
+
+  const handleValidateDeposit = () => {
+    if (lines.length === 0) {
+      toast.error("Veuillez ajouter au moins un article");
+      return;
+    }
+    if (!client.name || !client.phone) {
+      toast.error("Veuillez renseigner les informations client");
+      return;
+    }
+    if (!paymentMethod) {
+      toast.error("Veuillez sélectionner un mode de paiement");
+      return;
+    }
+    
+    // Generate deposit number
+    const depositNumber = `DEP-${Date.now().toString(36).toUpperCase()}`;
+    
+    toast.success(`Dépôt ${depositNumber} créé avec succès !`, {
+      description: `Total: ${total.toLocaleString()} FCFA - ${lines.length} article(s)`,
+    });
+    
+    // Reset form or navigate
+    navigate("/");
+  };
 
   const addLine = () => {
     setLines([
@@ -390,7 +418,11 @@ export default function NewDeposit() {
               </div>
             </div>
 
-            <Button className="w-full mt-6" size="lg" disabled={lines.length === 0}>
+            <Button 
+              className="w-full mt-6" 
+              size="lg" 
+              onClick={handleValidateDeposit}
+            >
               Valider le dépôt
             </Button>
           </Card>
