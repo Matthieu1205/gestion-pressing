@@ -1,20 +1,45 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight, Zap, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { format, addMonths, subMonths, startOfWeek, addDays } from "date-fns";
+import { fr } from "date-fns/locale";
 
-const weekDays = [
-  { date: "23", day: "Lun", capacity: 100, load: 85, express: 5 },
-  { date: "24", day: "Mar", capacity: 100, load: 92, express: 8 },
-  { date: "25", day: "Mer", capacity: 100, load: 78, express: 3 },
-  { date: "26", day: "Jeu", capacity: 100, load: 110, express: 12, overload: true },
-  { date: "27", day: "Ven", capacity: 100, load: 95, express: 7 },
-  { date: "28", day: "Sam", capacity: 100, load: 120, express: 15, overload: true },
-  { date: "29", day: "Dim", capacity: 0, load: 0, express: 0, closed: true },
-];
+const generateWeekData = (startDate: Date) => {
+  const days = [];
+  for (let i = 0; i < 7; i++) {
+    const date = addDays(startDate, i);
+    const dayOfWeek = date.getDay();
+    const isSunday = dayOfWeek === 0;
+    
+    days.push({
+      date: format(date, "d"),
+      day: format(date, "EEE", { locale: fr }),
+      capacity: isSunday ? 0 : 100,
+      load: isSunday ? 0 : Math.floor(Math.random() * 50) + 70,
+      express: isSunday ? 0 : Math.floor(Math.random() * 15) + 2,
+      closed: isSunday,
+      overload: !isSunday && Math.random() > 0.7,
+    });
+  }
+  return days;
+};
 
 export default function Planning() {
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
+  const weekDays = generateWeekData(weekStart);
+
+  const handlePreviousMonth = () => {
+    setCurrentDate(subMonths(currentDate, 1));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentDate(addMonths(currentDate, 1));
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -26,11 +51,13 @@ export default function Planning() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon">
+          <Button variant="outline" size="icon" onClick={handlePreviousMonth}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="font-medium px-4">Décembre 2024</span>
-          <Button variant="outline" size="icon">
+          <span className="font-medium px-4 capitalize">
+            {format(currentDate, "MMMM yyyy", { locale: fr })}
+          </span>
+          <Button variant="outline" size="icon" onClick={handleNextMonth}>
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
