@@ -19,8 +19,20 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { NewClientDialog, NewClientData } from "@/components/clients/NewClientDialog";
 
-const clients = [
+interface Client {
+  id: number;
+  name: string;
+  phone: string;
+  email: string | null;
+  isVip: boolean;
+  totalOrders: number;
+  totalSpent: number;
+  lastVisit: string;
+}
+
+const initialClients: Client[] = [
   {
     id: 1,
     name: "Marie Koné",
@@ -75,12 +87,28 @@ const clients = [
 
 export default function Clients() {
   const [search, setSearch] = useState("");
+  const [clients, setClients] = useState<Client[]>(initialClients);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const filteredClients = clients.filter(
     (client) =>
       client.name.toLowerCase().includes(search.toLowerCase()) ||
       client.phone.includes(search)
   );
+
+  const handleClientCreated = (newClientData: NewClientData) => {
+    const newClient: Client = {
+      id: clients.length + 1,
+      name: newClientData.name,
+      phone: newClientData.phone,
+      email: newClientData.email || null,
+      isVip: newClientData.isVip,
+      totalOrders: 0,
+      totalSpent: 0,
+      lastVisit: "Aujourd'hui",
+    };
+    setClients([newClient, ...clients]);
+  };
 
   return (
     <div className="space-y-6">
@@ -92,11 +120,17 @@ export default function Clients() {
             Gérez votre base de clients et consultez leur historique
           </p>
         </div>
-        <Button>
+        <Button onClick={() => setIsDialogOpen(true)}>
           <Plus className="h-4 w-4" />
           Nouveau client
         </Button>
       </div>
+
+      <NewClientDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        onClientCreated={handleClientCreated}
+      />
 
       {/* Search & Stats */}
       <div className="grid gap-4 md:grid-cols-4">
