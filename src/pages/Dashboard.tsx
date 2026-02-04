@@ -31,7 +31,7 @@ export default function Dashboard() {
             <RefreshCw className="h-4 w-4" />
             Actualiser
           </Button>
-          <Button size="sm" onClick={() => navigate("/nouveau-depot")}>
+          <Button size="sm" onClick={() => navigate("/depot")}>
             <Plus className="h-4 w-4" />
             Nouveau dépôt
           </Button>
