@@ -11,8 +11,11 @@ import {
   Plus,
   RefreshCw,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
+  const navigate = useNavigate();
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -28,7 +31,7 @@ export default function Dashboard() {
             <RefreshCw className="h-4 w-4" />
             Actualiser
           </Button>
-          <Button size="sm">
+          <Button size="sm" onClick={() => navigate("/nouveau-depot")}>
             <Plus className="h-4 w-4" />
             Nouveau dépôt
           </Button>
