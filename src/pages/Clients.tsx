@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { NewClientDialog, NewClientData } from "@/components/clients/NewClientDialog";
+import { toast } from "@/hooks/use-toast";
 
 interface Client {
   id: number;
@@ -86,6 +88,7 @@ const initialClients: Client[] = [
 ];
 
 export default function Clients() {
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [clients, setClients] = useState<Client[]>(initialClients);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -108,6 +111,34 @@ export default function Clients() {
       lastVisit: "Aujourd'hui",
     };
     setClients([newClient, ...clients]);
+  };
+
+  const handleViewProfile = (client: Client) => {
+    toast({
+      title: `Profil de ${client.name}`,
+      description: `Téléphone: ${client.phone} | Commandes: ${client.totalOrders} | Total: ${client.totalSpent.toLocaleString()} FCFA`,
+    });
+  };
+
+  const handleViewHistory = (client: Client) => {
+    toast({
+      title: `Historique de ${client.name}`,
+      description: `${client.totalOrders} dépôts enregistrés pour un total de ${client.totalSpent.toLocaleString()} FCFA`,
+    });
+  };
+
+  const handleNewDeposit = (client: Client) => {
+    navigate("/depot", { state: { clientId: client.id, clientName: client.name } });
+  };
+
+  const handleToggleVip = (clientId: number) => {
+    setClients(clients.map(c => 
+      c.id === clientId ? { ...c, isVip: true } : c
+    ));
+    toast({
+      title: "Statut VIP activé",
+      description: "Le client a été passé en VIP avec succès.",
+    });
   };
 
   return (
@@ -230,11 +261,19 @@ export default function Clients() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem>Voir le profil</DropdownMenuItem>
-                    <DropdownMenuItem>Historique des dépôts</DropdownMenuItem>
-                    <DropdownMenuItem>Nouveau dépôt</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleViewProfile(client)}>
+                      Voir le profil
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleViewHistory(client)}>
+                      Historique des dépôts
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleNewDeposit(client)}>
+                      Nouveau dépôt
+                    </DropdownMenuItem>
                     {!client.isVip && (
-                      <DropdownMenuItem>Passer en VIP</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleToggleVip(client.id)}>
+                        Passer en VIP
+                      </DropdownMenuItem>
                     )}
                   </DropdownMenuContent>
                 </DropdownMenu>
